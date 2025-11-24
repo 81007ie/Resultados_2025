@@ -29,12 +29,6 @@ function parseCSV(text) {
 // ===============================
 const coloresListas = ["#1e88e5", "#ffb300", "#43a047", "#e53935", "#8e24aa", "#00acc1"];
 
-// ===============================
-// Variables para acumular votos
-// ===============================
-let resumenDataPrev = [];
-let gradosDataPrev = [];
-
 // =====================================================================================
 // 1️⃣ GRÁFICO RESUMEN — VOTOS POR LISTA (Barras)
 // =====================================================================================
@@ -44,7 +38,7 @@ async function fetchResumenData() {
     const csvText = await response.text();
     const rows = parseCSV(csvText);
 
-    // Saltar encabezado si existe
+    // La primera fila es encabezado: "Lista,Total Votos"
     return rows.slice(1).map((r) => [r[0], Number(r[1])]);
   } catch (err) {
     console.error("Error leyendo CSV resumen:", err);
@@ -58,29 +52,21 @@ async function drawResumenChart() {
   const resumen = await fetchResumenData();
   if (!resumen) return;
 
-  // Inicializar o acumular votos
-  if (resumenDataPrev.length === 0) {
-    resumenDataPrev = resumen.map((r) => r[1]);
-  } else {
-    resumenDataPrev = resumenDataPrev.map((v, i) => v + resumen[i][1]);
-  }
-
-  const maxVotos = Math.max(...resumenDataPrev);
+  const maxVotos = Math.max(...resumen.map((x) => x[1]));
 
   const dataArray = [["Lista", "Votos", { role: "style" }, { role: "annotation" }]];
 
   resumen.forEach((item, index) => {
-    const votosActuales = resumenDataPrev[index];
-    const esGanador = votosActuales === maxVotos;
+    const esGanador = item[1] === maxVotos;
     const color = coloresListas[index % coloresListas.length];
 
     dataArray.push([
       item[0],
-      votosActuales,
+      item[1],
       esGanador
         ? `color: ${color}; stroke-color: #000; stroke-width: 3`
         : `color: ${color}`,
-      votosActuales,
+      item[1],
     ]);
   });
 
@@ -111,7 +97,18 @@ async function fetchAnalisisData() {
   try {
     const response = await fetch(CSV_ANALISIS);
     const csvText = await response.text();
-    return parseCSV(csvText).slice(1); // Saltar encabezado
+    const rows = parseCSV(csvText);
+
+    // La primera fila contiene los nombres de las listas
+    const encabezado = rows[0].slice(1); // ["Lista 1: ...", "Lista 2: ..."]
+    const datos = rows.slice(1); // filas de grados
+
+    // Convertir a totales por grado sumando columnas
+    const totalesPorGrado = datos.map((fila) =>
+      fila.slice(1).reduce((suma, val) => suma + Number(val), 0)
+    );
+
+    return { grados: datos.map(r => r[0]), totales: totalesPorGrado, encabezado };
   } catch (err) {
     console.error("Error leyendo CSV análisis:", err);
     document.getElementById("pastel_grados_div").innerHTML =
@@ -124,30 +121,12 @@ async function drawGradosChart() {
   const raw = await fetchAnalisisData();
   if (!raw) return;
 
-  const grados = [
-    "1° Primaria",
-    "2° Primaria",
-    "3° Primaria",
-    "4° Primaria",
-    "5° Primaria",
-    "6° Primaria",
-  ];
-
-  // Totales nuevos
-  const totales = raw.map((fila) => fila.reduce((s, v) => s + Number(v), 0));
-
-  // Inicializar o acumular votos
-  if (gradosDataPrev.length === 0) {
-    gradosDataPrev = totales;
-  } else {
-    gradosDataPrev = gradosDataPrev.map((v, i) => v + totales[i]);
-  }
-
-  const maxTotal = Math.max(...gradosDataPrev);
+  const { grados, totales } = raw;
+  const maxTotal = Math.max(...totales);
 
   const matriz = [["Grado", "Total Votos", { role: "style" }, { role: "annotation" }]];
 
-  gradosDataPrev.forEach((total, i) => {
+  totales.forEach((total, i) => {
     const esGanador = total === maxTotal;
     const color = coloresListas[i % coloresListas.length];
 
