@@ -6,7 +6,7 @@
     <title>Resultados Elecciones 🗳️</title>
     <link rel="icon" type="image/png" href="logo.png">
 
-    <link rel="stylesheet" href="colors.css"> 
+    <link rel="stylesheet" href="colors.css">
 
     <style>
         :root { 
@@ -59,30 +59,40 @@
     <div class="dashboard-container">
         <h1>📊 Resultados de Votos</h1>
         
+        <!-- ===========================
+             GRÁFICO RESUMEN
+        ============================== -->
         <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">
             🥇 Conteo Total de Votos por Lista
         </h2>
+
         <div id="resumen_chart_div" style="width: 95%; height: 500px; margin: 0 auto 50px auto;"></div>
 
         <hr style="border: 1px dashed #ccc; margin: 40px 0;">
 
+        <!-- ===========================
+             GRÁFICO GRADOS
+        ============================== -->
         <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">
-            🔎 Participación por Grado
+            🔎 Participación por Grado 
         </h2>
         
         <div style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-start;">
-            <div id="pastel_grados_div" style="min-width: 350px; width: 40%; height: 400px; padding: 10px;"></div>
+            
+            <!-- Gráfico agrupado -->
+            <div id="pastel_grados_div" style="min-width: 450px; width: 55%; height: 450px; padding: 10px;"></div>
 
-            <div style="flex-grow: 1; min-width: 300px; max-width: 500px; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #f7f9fc;">
+            <div style="flex-grow: 1; min-width: 300px; max-width: 450px; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #f7f9fc;">
                 <p style="font-size: 1.2em; font-weight: 700; color: var(--azul-oscuro);">Interpretación rápida:</p>
                 <ul class="interpretacion">
-                    <li>🏆 <strong>Gráfico Total de Votos:</strong> Cada barra representa una lista con un color distinto. La barra con borde negro indica la lista ganadora.</li>
-                    <li>📊 <strong>Participación por Grado:</strong> Muestra cuántos votos han emitido los estudiantes por grado. Cada barra tiene color propio y se actualiza automáticamente.</li>
+                    <li>🏆 <strong>Gráfico Total de Votos:</strong> Cada barra representa una lista y la barra con borde negro indica la ganadora.</li>
+                    <li>🎓 <strong>Gráfico Participación por Grado:</strong> En cada grado verás 4 barras (1 por lista). Muestra cuántos votos aporta cada grado en tiempo real.</li>
                 </ul>
             </div>
         </div>
     </div>
 
+    <!-- Tu JS -->
     <script src="resultados.js"></script>
 </body>
 </html>
