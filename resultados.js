@@ -24,17 +24,28 @@ function parseCSV(text) {
     .map((row) => row.split(","));
 }
 
-// =====================================================================================
-// 1️⃣ GRÁFICO RESUMEN — VOTOS POR LISTA (Barras) + Hover + Números + Barra Ganadora
-// =====================================================================================
+// ===============================
+// Colores para cada lista/grado
+// ===============================
+const coloresListas = ["#1e88e5", "#ffb300", "#43a047", "#e53935", "#8e24aa", "#00acc1"];
 
+// ===============================
+// Variables para acumular votos
+// ===============================
+let resumenDataPrev = [];
+let gradosDataPrev = [];
+
+// =====================================================================================
+// 1️⃣ GRÁFICO RESUMEN — VOTOS POR LISTA (Barras)
+// =====================================================================================
 async function fetchResumenData() {
   try {
     const response = await fetch(CSV_RESUMEN);
     const csvText = await response.text();
     const rows = parseCSV(csvText);
 
-    return rows.map((r) => [r[0], Number(r[1])]);
+    // Saltar encabezado si existe
+    return rows.slice(1).map((r) => [r[0], Number(r[1])]);
   } catch (err) {
     console.error("Error leyendo CSV resumen:", err);
     document.getElementById("resumen_chart_div").innerHTML =
@@ -47,23 +58,29 @@ async function drawResumenChart() {
   const resumen = await fetchResumenData();
   if (!resumen) return;
 
-  // Obtener la barra ganadora
-  const maxVotos = Math.max(...resumen.map((x) => x[1]));
+  // Inicializar o acumular votos
+  if (resumenDataPrev.length === 0) {
+    resumenDataPrev = resumen.map((r) => r[1]);
+  } else {
+    resumenDataPrev = resumenDataPrev.map((v, i) => v + resumen[i][1]);
+  }
 
-  const dataArray = [
-    ["Lista", "Votos", { role: "style" }, { role: "annotation" }]
-  ];
+  const maxVotos = Math.max(...resumenDataPrev);
 
-  resumen.forEach((item) => {
-    const esGanador = item[1] === maxVotos;
+  const dataArray = [["Lista", "Votos", { role: "style" }, { role: "annotation" }]];
+
+  resumen.forEach((item, index) => {
+    const votosActuales = resumenDataPrev[index];
+    const esGanador = votosActuales === maxVotos;
+    const color = coloresListas[index % coloresListas.length];
 
     dataArray.push([
       item[0],
-      item[1],
+      votosActuales,
       esGanador
-        ? "color: #FFA726; stroke-color: #E65100; stroke-width: 3"
-        : "color: #1e3c72",
-      item[1]
+        ? `color: ${color}; stroke-color: #000; stroke-width: 3`
+        : `color: ${color}`,
+      votosActuales,
     ]);
   });
 
@@ -72,14 +89,11 @@ async function drawResumenChart() {
   const options = {
     title: "Total de Votos por Lista",
     legend: { position: "none" },
-    animation: { startup: true, duration: 800, easing: "out" },
+    animation: { startup: true, duration: 1000, easing: "out" },
     bar: { groupWidth: "65%" },
-    focusTarget: "category",
     hAxis: { title: "Votos", minValue: 0 },
     chartArea: { width: "80%", height: "75%" },
-    annotations: {
-      textStyle: { fontSize: 14, bold: true, color: "#333" }
-    }
+    annotations: { textStyle: { fontSize: 14, bold: true, color: "#333" } },
   };
 
   const chart = new google.visualization.ColumnChart(
@@ -92,14 +106,12 @@ async function drawResumenChart() {
 
 // =====================================================================================
 // 2️⃣ GRÁFICO PARTICIPACIÓN POR GRADO (Barras)
-//      – Hover + Números + Barra Ganadora
 // =====================================================================================
-
 async function fetchAnalisisData() {
   try {
     const response = await fetch(CSV_ANALISIS);
     const csvText = await response.text();
-    return parseCSV(csvText);
+    return parseCSV(csvText).slice(1); // Saltar encabezado
   } catch (err) {
     console.error("Error leyendo CSV análisis:", err);
     document.getElementById("pastel_grados_div").innerHTML =
@@ -118,28 +130,34 @@ async function drawGradosChart() {
     "3° Primaria",
     "4° Primaria",
     "5° Primaria",
-    "6° Primaria"
+    "6° Primaria",
   ];
+
+  // Totales nuevos
+  const totales = raw.map((fila) => fila.reduce((s, v) => s + Number(v), 0));
+
+  // Inicializar o acumular votos
+  if (gradosDataPrev.length === 0) {
+    gradosDataPrev = totales;
+  } else {
+    gradosDataPrev = gradosDataPrev.map((v, i) => v + totales[i]);
+  }
+
+  const maxTotal = Math.max(...gradosDataPrev);
 
   const matriz = [["Grado", "Total Votos", { role: "style" }, { role: "annotation" }]];
 
-  // Crear totales por grado
-  const totales = raw.map((fila) =>
-    fila.reduce((s, v) => s + Number(v), 0)
-  );
-
-  const maxTotal = Math.max(...totales);
-
-  totales.forEach((total, i) => {
+  gradosDataPrev.forEach((total, i) => {
     const esGanador = total === maxTotal;
+    const color = coloresListas[i % coloresListas.length];
 
     matriz.push([
       grados[i],
       total,
       esGanador
-        ? "color: #66BB6A; stroke-color: #1B5E20; stroke-width: 3"
-        : "color: #00AEEF",
-      total
+        ? `color: ${color}; stroke-color: #000; stroke-width: 3`
+        : `color: ${color}`,
+      total,
     ]);
   });
 
@@ -148,14 +166,11 @@ async function drawGradosChart() {
   const options = {
     title: "Participación por Grado",
     legend: { position: "none" },
-    animation: { startup: true, duration: 800, easing: "out" },
+    animation: { startup: true, duration: 1000, easing: "out" },
     bar: { groupWidth: "70%" },
-    focusTarget: "category",
     hAxis: { title: "Votos", minValue: 0 },
     chartArea: { width: "80%", height: "75%" },
-    annotations: {
-      textStyle: { fontSize: 14, bold: true, color: "#333" }
-    }
+    annotations: { textStyle: { fontSize: 14, bold: true, color: "#333" } },
   };
 
   const chart = new google.visualization.ColumnChart(

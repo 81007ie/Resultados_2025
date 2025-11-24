@@ -36,6 +36,19 @@
             border-bottom: 4px solid var(--azul-borde);
             margin-bottom: 40px;
         }
+        ul.interpretacion {
+            margin-top: 10px; 
+            line-height: 1.6;
+            padding-left: 20px;
+        }
+        ul.interpretacion li {
+            margin-bottom: 8px;
+        }
+        .nota {
+            margin-top: 15px; 
+            font-style: italic; 
+            color: #777;
+        }
     </style>
 
     <!-- Google Charts -->
@@ -62,8 +75,10 @@
 
             <div style="flex-grow: 1; min-width: 300px; max-width: 500px; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #f7f9fc;">
                 <p style="font-size: 1.2em; font-weight: 700; color: var(--azul-oscuro);">Interpretación rápida:</p>
-                <p>El gráfico superior muestra quién va ganando. El gráfico circular muestra la proporción de votos emitidos por cada grado.</p>
-                <p style="margin-top: 15px;">🔄 El dashboard se actualiza automáticamente cada 15 segundos.</p>
+                <ul class="interpretacion">
+                    <li>🏆 <strong>Gráfico Total de Votos:</strong> Cada barra representa una lista con un color distinto. La barra con borde negro indica la lista ganadora.</li>
+                    <li>📊 <strong>Participación por Grado:</strong> Muestra cuántos votos han emitido los estudiantes por grado. Cada barra tiene color propio y se actualiza automáticamente.</li>
+                </ul>
             </div>
         </div>
     </div>
