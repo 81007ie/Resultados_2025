@@ -61,9 +61,9 @@ async function drawResumenChart() {
       item[0],
       item[1],
       esGanador
-        ? "color: #FFA726; stroke-color: #E65100; stroke-width: 3" // Barra destacada
+        ? "color: #FFA726; stroke-color: #E65100; stroke-width: 3"
         : "color: #1e3c72",
-      item[1] // Número encima
+      item[1]
     ]);
   });
 
@@ -151,7 +151,7 @@ async function drawGradosChart() {
     animation: { startup: true, duration: 800, easing: "out" },
     bar: { groupWidth: "70%" },
     focusTarget: "category",
-    vAxis: { title: "Votos", minValue: 0 },
+    hAxis: { title: "Votos", minValue: 0 },
     chartArea: { width: "80%", height: "75%" },
     annotations: {
       textStyle: { fontSize: 14, bold: true, color: "#333" }
