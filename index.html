@@ -21,7 +21,7 @@
             color: #555;
         }
         .dashboard-container {
-            max-width: 1200px; 
+            max-width: 1300px; 
             margin: 0 auto; 
             background: white;
             padding: 40px; 
@@ -36,22 +36,8 @@
             border-bottom: 4px solid var(--azul-borde);
             margin-bottom: 40px;
         }
-        ul.interpretacion {
-            margin-top: 10px; 
-            line-height: 1.6;
-            padding-left: 20px;
-        }
-        ul.interpretacion li {
-            margin-bottom: 8px;
-        }
-        .nota {
-            margin-top: 15px; 
-            font-style: italic; 
-            color: #777;
-        }
     </style>
 
-    <!-- Google Charts -->
     <script src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 
@@ -59,40 +45,26 @@
     <div class="dashboard-container">
         <h1>📊 Resultados de Votos</h1>
         
-        <!-- ===========================
-             GRÁFICO RESUMEN
-        ============================== -->
         <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">
             🥇 Conteo Total de Votos por Lista
         </h2>
 
-        <div id="resumen_chart_div" style="width: 95%; height: 500px; margin: 0 auto 50px auto;"></div>
+        <!-- ID CORRECTO -->
+        <div id="resumen_chart_div" style="width: 100%; height: 520px; margin: 0 auto 50px auto;"></div>
 
         <hr style="border: 1px dashed #ccc; margin: 40px 0;">
 
-        <!-- ===========================
-             GRÁFICO GRADOS
-        ============================== -->
         <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">
-            🔎 Participación por Grado 
+            🔎 Participación por Grado
         </h2>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-start;">
-            
-            <!-- Gráfico agrupado -->
-            <div id="pastel_grados_div" style="min-width: 450px; width: 55%; height: 450px; padding: 10px;"></div>
 
-            <div style="flex-grow: 1; min-width: 300px; max-width: 450px; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #f7f9fc;">
-                <p style="font-size: 1.2em; font-weight: 700; color: var(--azul-oscuro);">Interpretación rápida:</p>
-                <ul class="interpretacion">
-                    <li>🏆 <strong>Gráfico Total de Votos:</strong> Cada barra representa una lista y la barra con borde negro indica la ganadora.</li>
-                    <li>🎓 <strong>Gráfico Participación por Grado:</strong> En cada grado verás 4 barras (1 por lista). Muestra cuántos votos aporta cada grado en tiempo real.</li>
-                </ul>
-            </div>
+        <!-- ID CORRECTO -->
+        <div id="grados_chart_div"
+             style="width: 100%; height: 550px; margin: 0 auto; padding: 10px;">
         </div>
+
     </div>
 
-    <!-- Tu JS -->
     <script src="resultados.js"></script>
 </body>
 </html>
