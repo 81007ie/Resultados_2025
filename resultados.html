@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados Elecciones 🗳️</title>
+    <link rel="stylesheet" href="colors.css"> 
+    <style>
+        /* Puedes copiar aquí tus estilos :root y generales para el fondo */
+        :root { 
+            --azul-oscuro: #1e3c72;
+            --azul-borde: #00AEEF;
+            /* ... (etc.) */
+        }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #e0f2f7 0%, #d8e5ed 100%); 
+            min-height: 100vh; 
+            padding: 40px; 
+            color: #555;
+        }
+        .dashboard-container {
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white;
+            padding: 40px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 60px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center; 
+            color: var(--azul-oscuro); 
+            font-size: 2.5em; 
+            padding-bottom: 15px;
+            border-bottom: 4px solid var(--azul-borde);
+            margin-bottom: 40px;
+        }
+    </style>
+    
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>📊 Resultados de Votos </h1>
+        
+        <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">🥇 Conteo Total de Votos por Lista</h2>
+        <div id="resumen_chart_div" style="width: 95%; height: 500px; margin: 0 auto 50px auto;"></div>
+
+        <hr style="border: 1px dashed #ccc; margin: 40px 0;">
+
+        <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">🔎 Análisis de Participación por Grado</h2>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-start;">
+            
+            <div id="pastel_grados_div" style="min-width: 350px; width: 40%; height: 400px; padding: 10px;">
+                </div>
+
+            <div style="flex-grow: 1; min-width: 300px; max-width: 500px; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #f7f9fc;">
+                <p style="font-size: 1.2em; font-weight: 700; color: var(--azul-oscuro);">Interpretación Rápida:</p>
+                <p>El gráfico superior muestra quién va ganando. Este gráfico circular muestra la **proporción de votos emitidos por cada grado** sobre el total de participación, indicando la composición demográfica de los votantes.</p>
+                <p style="margin-top: 15px;">**Actualización:** El dashboard se actualiza automáticamente cada 15 segundos.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="resultados.js"></script>
+</body>
+</html>
