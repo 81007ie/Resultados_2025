@@ -1,161 +1,167 @@
-// =============================================
-// 🚀 CARGA GOOGLE CHARTS
-// =============================================
+// ===============================
+// URLs de los CSV públicos
+// ===============================
+const CSV_RESUMEN =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcaBIoYeJQDOMRnrmXWro6B4bGEEB1jjs5zKrwrly-hoCE1kSX_0AR_cqLTWCg2uXaDpYkCIsOfBps/pub?gid=1215585848&single=true&output=csv";
+
+const CSV_ANALISIS =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcaBIoYeJQDOMRnrmXWro6B4bGEEB1jjs5zKrwrly-hoCE1kSX_0AR_cqLTWCg2uXaDpYkCIsOfBps/pub?gid=1597888877&single=true&output=csv";
+
+// ===============================
+// Cargar Google Charts
+// ===============================
 google.charts.load("current", { packages: ["corechart", "bar"] });
-google.charts.setOnLoadCallback(inicializarDashboard);
+google.charts.setOnLoadCallback(drawResumenChart);
+google.charts.setOnLoadCallback(drawGradosChart);
 
-// Guardamos data previa para evitar re-dibujos innecesarios
-let ultimaDataResumen = "";
-let ultimaDataGrados = "";
-
-// =============================================
-// 🟦 FUNCIÓN PRINCIPAL
-// =============================================
-function inicializarDashboard() {
-    cargarDatos();
-    setInterval(cargarDatos, 5000); // Actualiza solo si hay cambios
+// ===============================
+// Convertir CSV → Matriz
+// ===============================
+function parseCSV(text) {
+  return text
+    .trim()
+    .split("\n")
+    .map((row) => row.split(","));
 }
 
-// =============================================
-// 📥 OBTENER DATOS DEL SERVIDOR
-// =============================================
-async function cargarDatos() {
-    try {
-        const response = await fetch(
-            "https://script.google.com/macros/s/AKfycbxMuZpPGy1OixpIYqmqhB3hqzO522V5MTF42Kw1F-yxpWBUQMwkhS31G1mLqvrw1-Wp/exec"
-        );
-        const data = await response.json();
+// =====================================================================================
+// 1️⃣ GRÁFICO RESUMEN — VOTOS POR LISTA (Barras) + Hover + Números + Barra Ganadora
+// =====================================================================================
 
-        const jsonResumen = JSON.stringify(data.resumen);
-        const jsonGrados = JSON.stringify(data.grados);
+async function fetchResumenData() {
+  try {
+    const response = await fetch(CSV_RESUMEN);
+    const csvText = await response.text();
+    const rows = parseCSV(csvText);
 
-        if (jsonResumen !== ultimaDataResumen) {
-            ultimaDataResumen = jsonResumen;
-            dibujarGraficoResumen(data.resumen);
-        }
+    return rows.map((r) => [r[0], Number(r[1])]);
+  } catch (err) {
+    console.error("Error leyendo CSV resumen:", err);
+    document.getElementById("resumen_chart_div").innerHTML =
+      '<p style="color:red;text-align:center;">⚠️ Error cargando datos del resumen.</p>';
+    return null;
+  }
+}
 
-        if (jsonGrados !== ultimaDataGrados) {
-            ultimaDataGrados = jsonGrados;
-            dibujarGraficoGrados(data.grados);
-        }
+async function drawResumenChart() {
+  const resumen = await fetchResumenData();
+  if (!resumen) return;
 
-    } catch (error) {
-        console.error("Error cargando datos:", error);
+  // Obtener la barra ganadora
+  const maxVotos = Math.max(...resumen.map((x) => x[1]));
+
+  const dataArray = [
+    ["Lista", "Votos", { role: "style" }, { role: "annotation" }]
+  ];
+
+  resumen.forEach((item) => {
+    const esGanador = item[1] === maxVotos;
+
+    dataArray.push([
+      item[0],
+      item[1],
+      esGanador
+        ? "color: #FFA726; stroke-color: #E65100; stroke-width: 3" // Barra destacada
+        : "color: #1e3c72",
+      item[1] // Número encima
+    ]);
+  });
+
+  const data = google.visualization.arrayToDataTable(dataArray);
+
+  const options = {
+    title: "Total de Votos por Lista",
+    legend: { position: "none" },
+    animation: { startup: true, duration: 800, easing: "out" },
+    bar: { groupWidth: "65%" },
+    focusTarget: "category",
+    hAxis: { title: "Votos", minValue: 0 },
+    chartArea: { width: "80%", height: "75%" },
+    annotations: {
+      textStyle: { fontSize: 14, bold: true, color: "#333" }
     }
+  };
+
+  const chart = new google.visualization.ColumnChart(
+    document.getElementById("resumen_chart_div")
+  );
+  chart.draw(data, options);
+
+  setTimeout(drawResumenChart, 5000);
 }
 
-// =============================================
-// 📊 GRAFICO 1 — VOTOS POR LISTA (barras)
-// =============================================
-function dibujarGraficoResumen(resumen) {
-    const datos = [
-        ["Lista", "Votos", { role: "style" }, { role: "annotation" }]
-    ];
+// =====================================================================================
+// 2️⃣ GRÁFICO PARTICIPACIÓN POR GRADO (Barras)
+//      – Hover + Números + Barra Ganadora
+// =====================================================================================
 
-    const colores = ["#1e3c72", "#00AEEF", "#7DD3FC", "#2563EB", "#3B82F6"];
-
-    // 📌 Encontrar la lista ganadora
-    const maxVotos = Math.max(...resumen.map(l => l.votos));
-
-    resumen.forEach((item, i) => {
-        const esGanador = item.votos === maxVotos;
-
-        const estilo = esGanador
-            ? "color: #FFD700; stroke-color: #b88a00; stroke-width: 3; opacity: 1" // 🎉 Barra ganadora
-            : `color: ${colores[i % colores.length]}`;
-
-        datos.push([
-            item.lista,
-            item.votos,
-            estilo,
-            item.votos
-        ]);
-    });
-
-    const data = google.visualization.arrayToDataTable(datos);
-
-    const options = {
-        animation: {
-            startup: true,
-            duration: 900,
-            easing: "out"
-        },
-        legend: { position: "none" },
-        bar: { groupWidth: "65%" },
-        hAxis: { title: "Votos", minValue: 0 },
-        chartArea: { width: "80%", height: "70%" },
-
-        // ⭐ Hover suave
-        focusTarget: "category",
-
-        annotations: {
-            textStyle: {
-                fontSize: 14,
-                bold: true,
-                color: "#333"
-            }
-        }
-    };
-
-    const chart = new google.visualization.ColumnChart(
-        document.getElementById("resumen_chart_div")
-    );
-    chart.draw(data, options);
+async function fetchAnalisisData() {
+  try {
+    const response = await fetch(CSV_ANALISIS);
+    const csvText = await response.text();
+    return parseCSV(csvText);
+  } catch (err) {
+    console.error("Error leyendo CSV análisis:", err);
+    document.getElementById("pastel_grados_div").innerHTML =
+      '<p style="color:red;text-align:center;">⚠️ Error cargando análisis por grados.</p>';
+    return null;
+  }
 }
 
-// =============================================
-// 📊 GRAFICO 2 — VOTOS POR GRADO (barras)
-// =============================================
-function dibujarGraficoGrados(grados) {
-    const datos = [
-        ["Grado", "Votos", { role: "style" }, { role: "annotation" }]
-    ];
+async function drawGradosChart() {
+  const raw = await fetchAnalisisData();
+  if (!raw) return;
 
-    const colores = ["#1e3c72", "#00AEEF", "#7DD3FC", "#2563EB"];
+  const grados = [
+    "1° Primaria",
+    "2° Primaria",
+    "3° Primaria",
+    "4° Primaria",
+    "5° Primaria",
+    "6° Primaria"
+  ];
 
-    // 📌 Encontrar grado con mayor voto
-    const maxVotos = Math.max(...grados.map(g => g.votos));
+  const matriz = [["Grado", "Total Votos", { role: "style" }, { role: "annotation" }]];
 
-    grados.forEach((g, i) => {
-        const esGanador = g.votos === maxVotos;
+  // Crear totales por grado
+  const totales = raw.map((fila) =>
+    fila.reduce((s, v) => s + Number(v), 0)
+  );
 
-        const estilo = esGanador
-            ? "color: #FFD700; stroke-color: #b88a00; stroke-width: 3; opacity: 1" // 🎉 Barra ganadora
-            : `color: ${colores[i % colores.length]}`;
+  const maxTotal = Math.max(...totales);
 
-        datos.push([
-            g.grado,
-            g.votos,
-            estilo,
-            g.votos
-        ]);
-    });
+  totales.forEach((total, i) => {
+    const esGanador = total === maxTotal;
 
-    const data = google.visualization.arrayToDataTable(datos);
+    matriz.push([
+      grados[i],
+      total,
+      esGanador
+        ? "color: #66BB6A; stroke-color: #1B5E20; stroke-width: 3"
+        : "color: #00AEEF",
+      total
+    ]);
+  });
 
-    const options = {
-        animation: {
-            startup: true,
-            duration: 900,
-            easing: "out"
-        },
-        legend: { position: "none" },
-        bar: { groupWidth: "70%" },
-        hAxis: { title: "Votos", minValue: 0 },
-        chartArea: { width: "80%", height: "70%" },
-        focusTarget: "category",
+  const data = google.visualization.arrayToDataTable(matriz);
 
-        annotations: {
-            textStyle: {
-                fontSize: 14,
-                bold: true,
-                color: "#333"
-            }
-        }
-    };
+  const options = {
+    title: "Participación por Grado",
+    legend: { position: "none" },
+    animation: { startup: true, duration: 800, easing: "out" },
+    bar: { groupWidth: "70%" },
+    focusTarget: "category",
+    vAxis: { title: "Votos", minValue: 0 },
+    chartArea: { width: "80%", height: "75%" },
+    annotations: {
+      textStyle: { fontSize: 14, bold: true, color: "#333" }
+    }
+  };
 
-    const chart = new google.visualization.ColumnChart(
-        document.getElementById("pastel_grados_div")
-    );
-    chart.draw(data, options);
+  const chart = new google.visualization.ColumnChart(
+    document.getElementById("pastel_grados_div")
+  );
+  chart.draw(data, options);
+
+  setTimeout(drawGradosChart, 5000);
 }
