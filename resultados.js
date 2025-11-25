@@ -6,16 +6,16 @@ const CSV_ANALISIS_BASE =
 
 console.log("📊 Chart.js cargado correctamente.");
 
-// ======================================================================
-// FUNCIÓN PARA ELIMINAR CACHE DE GOOGLE SHEETS
-// ======================================================================
+// ==============================
+// FUNCIÓN PARA ELIMINAR CACHE
+// ==============================
 function noCache(url) {
   return `${url}&t=${Date.now()}`;
 }
 
-// ======================================================================
+// ==============================
 // CSV PARSER ROBUSTO
-// ======================================================================
+// ==============================
 function parseCSV(text) {
   console.log("📥 Parseando CSV…");
   return text
@@ -34,9 +34,9 @@ function parseCSV(text) {
     });
 }
 
-// ======================================================================
+// ==============================
 // COLORES LISTAS
-// ======================================================================
+// ==============================
 const coloresListas = [
   "#1e88e5", "#ffb300", "#43a047", "#e53935",
   "#8e24aa", "#00acc1"
@@ -49,9 +49,9 @@ let ganadorActual = null;
 // ✨ Confeti
 let confettiInterval = null;
 
-// ======================================================================
-// 1️⃣ GRÁFICO RESUMEN — TOTAL DE VOTOS POR LISTA
-// ======================================================================
+// ==============================
+// GRÁFICO RESUMEN
+// ==============================
 async function drawResumenChart() {
   try {
     const url = noCache(CSV_RESUMEN_BASE);
@@ -92,29 +92,26 @@ async function drawResumenChart() {
     });
   } catch (err) {
     console.error("❌ ERROR RESUMEN:", err);
-    document.getElementById("resumen_chart_div").innerHTML =
+    document.getElementById("resumenChart").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando datos del resumen.</p>";
   }
 
   setTimeout(drawResumenChart, 30000);
 }
 
-// ======================================================================
-// 2️⃣ GRÁFICO POR GRADOS — PARTICIPACIÓN
-// ======================================================================
+// ==============================
+// GRÁFICO GRADOS
+// ==============================
 async function drawGradosChart() {
   try {
     const url = noCache(CSV_ANALISIS_BASE);
     const res = await fetch(url);
     const csv = await res.text();
-
     const rows = parseCSV(csv);
 
     const listas = rows[0].slice(1);
     const grados = rows.slice(1).map(r => r[0]);
-    const valores = rows.slice(1).map(r =>
-      r.slice(1).map(v => Number(v))
-    );
+    const valores = rows.slice(1).map(r => r.slice(1).map(v => Number(v)));
 
     if (gradosChartInstance) gradosChartInstance.destroy();
 
@@ -140,50 +137,55 @@ async function drawGradosChart() {
     });
   } catch (err) {
     console.error("❌ ERROR GRADOS:", err);
-    document.getElementById("grados_chart_div").innerHTML =
+    document.getElementById("gradosChart").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando participación por grado.</p>";
   }
 
   setTimeout(drawGradosChart, 30000);
 }
 
-// ======================================================================
-// ⭐ MOSTRAR GANADOR CON CONFETI ESPECTACULAR
-// ======================================================================
+// ==============================
+// MOSTRAR GANADOR CON CONFETI LLUVIA
+// ==============================
 function mostrarGanador() {
   if (!ganadorActual) return alert("⚠️ Aún no hay ganador.");
 
   document.getElementById("winnerName").innerHTML = `🏆 ${ganadorActual}`;
   document.getElementById("winnerModal").style.display = "flex";
 
-  // 🔥 Confeti continuo espectacular
+  // 🔥 Confeti vertical hasta abajo
   if (confettiInterval) clearInterval(confettiInterval);
 
   confettiInterval = setInterval(() => {
-    // Generar partículas grandes
     confetti({
-      particleCount: 7 + Math.floor(Math.random() * 8),
-      angle: Math.random() * 60 + 60,
-      spread: 70,
+      particleCount: 8 + Math.floor(Math.random() * 12),
+      angle: 90,             // vertical
+      spread: 40,
       origin: { x: Math.random(), y: 0 },
       colors: coloresListas,
-      scalar: 1 + Math.random() * 0.8, // tamaño aleatorio
-      drift: (Math.random() - 0.5) * 2 // ligera desviación
+      ticks: 200,            // duración larga para que llegue al fondo
+      gravity: 0.5,
+      scalar: 0.7 + Math.random() * 0.5,
+      drift: (Math.random() - 0.5) * 0.5
     });
-
-    // Generar partículas pequeñas más rápidas
+    // partículas pequeñas adicionales
     confetti({
-      particleCount: 10 + Math.floor(Math.random() * 12),
-      angle: Math.random() * 100 + 40,
-      spread: 100,
+      particleCount: 12 + Math.floor(Math.random() * 15),
+      angle: 90,
+      spread: 60,
       origin: { x: Math.random(), y: 0 },
       colors: coloresListas,
-      scalar: 0.5 + Math.random() * 0.5,
-      drift: (Math.random() - 0.5) * 3
+      ticks: 180,
+      gravity: 0.6,
+      scalar: 0.4 + Math.random() * 0.4,
+      drift: (Math.random() - 0.5)
     });
-  }, 200); // cada 0.2 segundos
+  }, 200);
 }
 
+// ==============================
+// CERRAR GANADOR
+// ==============================
 function cerrarGanador() {
   document.getElementById("winnerModal").style.display = "none";
 
@@ -193,8 +195,8 @@ function cerrarGanador() {
   }
 }
 
-// ======================================================================
-// 🚀 INICIO
-// ======================================================================
+// ==============================
+// INICIO
+// ==============================
 drawResumenChart();
 drawGradosChart();
