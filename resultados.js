@@ -6,20 +6,18 @@ const CSV_ANALISIS_BASE =
 
 console.log("📊 Chart.js cargado correctamente.");
 
-
 // ======================================================================
-//  FUNCIÓN PARA ELIMINAR CACHE DE GOOGLE SHEETS
+// FUNCIÓN PARA ELIMINAR CACHE DE GOOGLE SHEETS
 // ======================================================================
 function noCache(url) {
   return `${url}&t=${Date.now()}`;
 }
 
 // ======================================================================
-//  CSV PARSER ROBUSTO
+// CSV PARSER ROBUSTO
 // ======================================================================
 function parseCSV(text) {
   console.log("📥 Parseando CSV…");
-
   return text
     .trim()
     .split("\n")
@@ -36,7 +34,6 @@ function parseCSV(text) {
     });
 }
 
-
 // ======================================================================
 // COLORES LISTAS
 // ======================================================================
@@ -48,7 +45,6 @@ const coloresListas = [
 let resumenChartInstance = null;
 let gradosChartInstance = null;
 let ganadorActual = null;
-
 
 // ======================================================================
 // 1️⃣ GRÁFICO RESUMEN — TOTAL DE VOTOS POR LISTA
@@ -68,10 +64,6 @@ async function drawResumenChart() {
     const csv = await res.text();
     const parsed = parseCSV(csv);
 
-    console.log("📄 CSV primeras líneas:\n",
-      csv.split("\n").slice(0, 4).join("\n")
-    );
-
     const rows = parsed.filter(r => r.length >= 2 && r[0]).slice(1);
 
     const labels = rows.map(r => r[0]);
@@ -79,10 +71,6 @@ async function drawResumenChart() {
 
     const maxVotos = Math.max(...values);
     ganadorActual = labels[values.indexOf(maxVotos)] ?? null;
-
-    console.log("📋 Etiquetas:", labels);
-    console.log("📊 Valores:", values);
-    console.log("🏆 Ganador:", ganadorActual);
 
     if (resumenChartInstance) resumenChartInstance.destroy();
 
@@ -101,7 +89,7 @@ async function drawResumenChart() {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false, // ⬅ evita que crezca demasiado
+        maintainAspectRatio: false,
         animation: { duration: 300 },
         scales: { y: { beginAtZero: true } },
         plugins: { legend: { display: false } }
@@ -114,9 +102,9 @@ async function drawResumenChart() {
       "<p style='color:red;text-align:center'>⚠️ Error cargando datos del resumen.</p>";
   }
 
-  setTimeout(drawResumenChart, 3500);
+  // 🔁 Actualización cada 30 segundos
+  setTimeout(drawResumenChart, 30000);
 }
-
 
 // ======================================================================
 // 2️⃣ GRÁFICO POR GRADOS — PARTICIPACIÓN
@@ -128,14 +116,8 @@ async function drawGradosChart() {
 
   try {
     const url = noCache(CSV_ANALISIS_BASE);
-    console.log("🔗 Fetch URL:", url);
-
     const res = await fetch(url);
     const csv = await res.text();
-
-    console.log("📄 CSV ANALISIS primeras líneas:\n",
-      csv.split("\n").slice(0, 4).join("\n")
-    );
 
     const rows = parseCSV(csv);
 
@@ -144,10 +126,6 @@ async function drawGradosChart() {
     const valores = rows.slice(1).map(r =>
       r.slice(1).map(v => Number(v))
     );
-
-    console.log("📋 Listas:", listas);
-    console.log("📋 Grados:", grados);
-    console.log("📊 Valores:", valores);
 
     if (gradosChartInstance) gradosChartInstance.destroy();
 
@@ -178,9 +156,9 @@ async function drawGradosChart() {
       "<p style='color:red;text-align:center'>⚠️ Error cargando participación por grado.</p>";
   }
 
-  setTimeout(drawGradosChart, 3500);
+  // 🔁 Actualización cada 30 segundos
+  setTimeout(drawGradosChart, 30000);
 }
-
 
 // ======================================================================
 // ⭐ MOSTRAR GANADOR
@@ -194,7 +172,6 @@ function mostrarGanador() {
 function cerrarGanador() {
   document.getElementById("winnerModal").style.display = "none";
 }
-
 
 // ======================================================================
 // 🚀 INICIO
