@@ -46,6 +46,9 @@ let resumenChartInstance = null;
 let gradosChartInstance = null;
 let ganadorActual = null;
 
+// ✨ Confeti
+let confettiInterval = null;
+
 // ======================================================================
 // 1️⃣ GRÁFICO RESUMEN — TOTAL DE VOTOS POR LISTA
 // ======================================================================
@@ -161,16 +164,35 @@ async function drawGradosChart() {
 }
 
 // ======================================================================
-// ⭐ MOSTRAR GANADOR
+// ⭐ MOSTRAR GANADOR CON CONFETI
 // ======================================================================
 function mostrarGanador() {
   if (!ganadorActual) return alert("⚠️ Aún no hay ganador.");
+
   document.getElementById("winnerName").innerHTML = `🏆 ${ganadorActual}`;
   document.getElementById("winnerModal").style.display = "flex";
+
+  // 🔥 Confeti continuo
+  if (confettiInterval) clearInterval(confettiInterval);
+
+  confettiInterval = setInterval(() => {
+    confetti({
+      particleCount: 5 + Math.floor(Math.random() * 10),
+      angle: 60 + Math.random() * 60,
+      spread: 55,
+      origin: { x: Math.random(), y: 0 },
+      colors: coloresListas
+    });
+  }, 250);
 }
 
 function cerrarGanador() {
   document.getElementById("winnerModal").style.display = "none";
+
+  if (confettiInterval) {
+    clearInterval(confettiInterval);
+    confettiInterval = null;
+  }
 }
 
 // ======================================================================
