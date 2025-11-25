@@ -53,17 +53,9 @@ let confettiInterval = null;
 // 1️⃣ GRÁFICO RESUMEN — TOTAL DE VOTOS POR LISTA
 // ======================================================================
 async function drawResumenChart() {
-  console.log("\n==============================");
-  console.log("🔄 Actualizando gráfico RESUMEN…");
-  console.log("==============================");
-
   try {
     const url = noCache(CSV_RESUMEN_BASE);
-    console.log("🔗 Fetch URL:", url);
-
     const res = await fetch(url);
-    console.log("📥 Estado FETCH:", res.status);
-
     const csv = await res.text();
     const parsed = parseCSV(csv);
 
@@ -98,14 +90,12 @@ async function drawResumenChart() {
         plugins: { legend: { display: false } }
       }
     });
-
   } catch (err) {
     console.error("❌ ERROR RESUMEN:", err);
     document.getElementById("resumen_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando datos del resumen.</p>";
   }
 
-  // 🔁 Actualización cada 30 segundos
   setTimeout(drawResumenChart, 30000);
 }
 
@@ -113,10 +103,6 @@ async function drawResumenChart() {
 // 2️⃣ GRÁFICO POR GRADOS — PARTICIPACIÓN
 // ======================================================================
 async function drawGradosChart() {
-  console.log("\n==============================");
-  console.log("🔄 Actualizando gráfico GRADOS…");
-  console.log("==============================");
-
   try {
     const url = noCache(CSV_ANALISIS_BASE);
     const res = await fetch(url);
@@ -152,19 +138,17 @@ async function drawGradosChart() {
         plugins: { legend: { position: "top" } }
       }
     });
-
   } catch (err) {
     console.error("❌ ERROR GRADOS:", err);
     document.getElementById("grados_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando participación por grado.</p>";
   }
 
-  // 🔁 Actualización cada 30 segundos
   setTimeout(drawGradosChart, 30000);
 }
 
 // ======================================================================
-// ⭐ MOSTRAR GANADOR CON CONFETI
+// ⭐ MOSTRAR GANADOR CON CONFETI ESPECTACULAR
 // ======================================================================
 function mostrarGanador() {
   if (!ganadorActual) return alert("⚠️ Aún no hay ganador.");
@@ -172,18 +156,32 @@ function mostrarGanador() {
   document.getElementById("winnerName").innerHTML = `🏆 ${ganadorActual}`;
   document.getElementById("winnerModal").style.display = "flex";
 
-  // 🔥 Confeti continuo
+  // 🔥 Confeti continuo espectacular
   if (confettiInterval) clearInterval(confettiInterval);
 
   confettiInterval = setInterval(() => {
+    // Generar partículas grandes
     confetti({
-      particleCount: 5 + Math.floor(Math.random() * 10),
-      angle: 60 + Math.random() * 60,
-      spread: 55,
+      particleCount: 7 + Math.floor(Math.random() * 8),
+      angle: Math.random() * 60 + 60,
+      spread: 70,
       origin: { x: Math.random(), y: 0 },
-      colors: coloresListas
+      colors: coloresListas,
+      scalar: 1 + Math.random() * 0.8, // tamaño aleatorio
+      drift: (Math.random() - 0.5) * 2 // ligera desviación
     });
-  }, 250);
+
+    // Generar partículas pequeñas más rápidas
+    confetti({
+      particleCount: 10 + Math.floor(Math.random() * 12),
+      angle: Math.random() * 100 + 40,
+      spread: 100,
+      origin: { x: Math.random(), y: 0 },
+      colors: coloresListas,
+      scalar: 0.5 + Math.random() * 0.5,
+      drift: (Math.random() - 0.5) * 3
+    });
+  }, 200); // cada 0.2 segundos
 }
 
 function cerrarGanador() {
