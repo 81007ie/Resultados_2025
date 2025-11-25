@@ -37,17 +37,21 @@
             margin-bottom: 40px;
         }
 
-        /* Modal del ganador */
         #winnerModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(4px);
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.5s forwards;
-        }
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+
+    /* ✅ Soporte completo */
+    -webkit-backdrop-filter: blur(4px); /* Safari */
+    backdrop-filter: blur(4px); /* Chrome, Edge, Firefox */
+
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.5s forwards;
+}
+
         .winnerBox {
             background: white;
             padding: 40px;

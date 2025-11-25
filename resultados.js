@@ -1,16 +1,9 @@
-// ===============================
-// URLs de los CSV
-// ===============================
 const CSV_RESUMEN =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcaBIoYeJQDOMRnrmXWro6B4bGEEB1jjs5zKrwrly-hoCE1kSX_0AR_cqLTWCg2uXaDpYkCIsOfBps/pub?gid=1215585848&single=true&output=csv";
 
 const CSV_ANALISIS =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcaBIoYeJQDOMRnrmXWro6B4bGEEB1jjs5zKrwrly-hoCE1kSX_0AR_cqLTWCg2uXaDpYkCIsOfBps/pub?gid=1597888877&single=true&output=csv";
 
-
-// ===============================
-// Cargar Google Charts
-// ===============================
 google.charts.load("current", { packages: ["corechart"] });
 google.charts.setOnLoadCallback(() => {
   drawResumenChart();
@@ -38,7 +31,6 @@ function parseCSV(text) {
     });
 }
 
-
 // ===============================
 // COLORES LISTAS
 // ===============================
@@ -60,7 +52,9 @@ async function drawResumenChart() {
     const csv = await (await fetch(CSV_RESUMEN)).text();
     const rows = parseCSV(csv).filter(r => r[0] && r[1]).slice(1);
 
-    const votos = rows.map(r => [r[0], Number(r[1])]);
+    // 🔥 FORZAR ENTEROS
+    const votos = rows.map(r => [r[0], Math.round(Number(r[1]))]);
+
     const maxVotos = Math.max(...votos.map(v => v[1]));
     const ganador = votos.find(v => v[1] === maxVotos)?.[0];
     ganadorActual = ganador;
@@ -123,6 +117,9 @@ async function drawResumenChart() {
 // ===================================================================
 // 2️⃣ GRÁFICO POR GRADOS
 // ===================================================================
+let gradosDataTable;
+let gradosChart;
+
 async function drawGradosChart() {
   try {
     const csv = await (await fetch(CSV_ANALISIS)).text();
@@ -130,7 +127,9 @@ async function drawGradosChart() {
 
     const listas = rows[0].slice(1);
     const grados = rows.slice(1).map(r => r[0]);
-    const datos = rows.slice(1).map(r => r.slice(1).map(Number));
+
+    // 🔥 CONVERTIR TODO A ENTEROS
+    const datos = rows.slice(1).map(r => r.slice(1).map(v => Math.round(Number(v))));
 
     if (!gradosDataTable) {
       gradosDataTable = new google.visualization.DataTable();
@@ -171,9 +170,8 @@ async function drawGradosChart() {
 }
 
 
-
 // ===================================================================
-// ⭐ FUNCIÓN: MOSTRAR GANADOR CON ANIMACIÓN
+// ⭐ GANADOR
 // ===================================================================
 function mostrarGanador() {
   if (!ganadorActual) {
