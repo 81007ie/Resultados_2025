@@ -22,25 +22,20 @@ google.charts.setOnLoadCallback(() => {
 // CSV Parser ROBUSTO
 // ===============================
 function parseCSV(text) {
-  const lines = text.trim().split("\n");
-  return lines.map((line) => {
-    let result = [];
-    let current = "";
-    let insideQuotes = false;
-
-    for (let char of line) {
-      if (char === '"') {
-        insideQuotes = !insideQuotes;
-      } else if (char === "," && !insideQuotes) {
-        result.push(current.trim());
-        current = "";
-      } else {
-        current += char;
+  return text
+    .trim()
+    .split("\n")
+    .map(line => {
+      const parts = [];
+      let inside = false, cur = "";
+      for (let ch of line) {
+        if (ch === '"') inside = !inside;
+        else if (ch === "," && !inside) { parts.push(cur.trim()); cur = ""; }
+        else cur += ch;
       }
-    }
-    result.push(current.trim());
-    return result;
-  });
+      parts.push(cur.trim());
+      return parts;
+    });
 }
 
 
@@ -52,23 +47,23 @@ const coloresListas = [
   "#8e24aa", "#00acc1"
 ];
 
-let resumenChart, resumenDataTable;
-let gradosChart, gradosDataTable;
+let resumenDataTable;
+let resumenChart;
+let ganadorActual = null;
 
 
 // ===================================================================
-// 1️⃣ GRÁFICO RESUMEN — Total de votos por lista
+// 1️⃣ GRÁFICO RESUMEN
 // ===================================================================
 async function drawResumenChart() {
   try {
     const csv = await (await fetch(CSV_RESUMEN)).text();
-    const rows = parseCSV(csv).slice(1);
+    const rows = parseCSV(csv).filter(r => r[0] && r[1]).slice(1);
 
-    const votos = rows
-      .filter(r => r[0] && r[1])
-      .map(r => [r[0], Number(r[1])]);
-
+    const votos = rows.map(r => [r[0], Number(r[1])]);
     const maxVotos = Math.max(...votos.map(v => v[1]));
+    const ganador = votos.find(v => v[1] === maxVotos)?.[0];
+    ganadorActual = ganador;
 
     if (!resumenDataTable) {
       resumenDataTable = new google.visualization.DataTable();
@@ -78,11 +73,11 @@ async function drawResumenChart() {
       resumenDataTable.addColumn({ type: "string", role: "annotation" });
 
       votos.forEach((v, i) => {
-        let color = coloresListas[i % coloresListas.length];
-        let style =
+        const color = coloresListas[i % coloresListas.length];
+        const style =
           v[1] === maxVotos
             ? `color:${color}; stroke-color:#FFD700; stroke-width:6;`
-            : `color:${color};`;
+            : `color:${color}`;
 
         resumenDataTable.addRow([v[0], v[1], style, v[1]]);
       });
@@ -91,48 +86,42 @@ async function drawResumenChart() {
         document.getElementById("resumen_chart_div")
       );
 
-      resumenChart.draw(resumenDataTable, getResumenOptions());
-
     } else {
       votos.forEach((v, i) => {
         resumenDataTable.setValue(i, 1, v[1]);
         resumenDataTable.setValue(i, 3, v[1]);
 
-        let color = coloresListas[i % coloresListas.length];
-        let style =
+        const color = coloresListas[i % coloresListas.length];
+        const style =
           v[1] === maxVotos
             ? `color:${color}; stroke-color:#FFD700; stroke-width:6;`
             : `color:${color}`;
 
         resumenDataTable.setValue(i, 2, style);
       });
-
-      resumenChart.draw(resumenDataTable, getResumenOptions());
     }
+
+    resumenChart.draw(resumenDataTable, {
+      legend: "none",
+      animation: { duration: 400, easing: "out" },
+      bar: { groupWidth: "70%" },
+      chartArea: { width: "80%", height: "70%" },
+      hAxis: { title: "Listas" },
+      vAxis: { title: "Votos" }
+    });
 
   } catch (err) {
     document.getElementById("resumen_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando datos del resumen.</p>";
   }
 
-  setTimeout(drawResumenChart, 3000);
-}
-
-function getResumenOptions() {
-  return {
-    legend: "none",
-    animation: { duration: 500, easing: "out" },
-    bar: { groupWidth: "70%" },
-    chartArea: { width: "80%", height: "70%" },
-    hAxis: { title: "Listas" },
-    vAxis: { title: "Votos" },
-  };
+  setTimeout(drawResumenChart, 3500);
 }
 
 
 
 // ===================================================================
-// 2️⃣ GRÁFICO AGRUPADO — Votos por grado
+// 2️⃣ GRÁFICO POR GRADOS
 // ===================================================================
 async function drawGradosChart() {
   try {
@@ -148,43 +137,56 @@ async function drawGradosChart() {
       gradosDataTable.addColumn("string", "Grado");
 
       listas.forEach(lista => gradosDataTable.addColumn("number", lista));
-
-      datos.forEach((fila, index) => {
-        gradosDataTable.addRow([grados[index], ...fila]);
+      datos.forEach((fila, i) => {
+        gradosDataTable.addRow([grados[i], ...fila]);
       });
 
       gradosChart = new google.visualization.ColumnChart(
         document.getElementById("grados_chart_div")
       );
 
-      gradosChart.draw(gradosDataTable, getGradosOptions());
-
     } else {
-      datos.forEach((fila, index) => {
+      datos.forEach((fila, i) => {
         fila.forEach((voto, j) => {
-          gradosDataTable.setValue(index, j + 1, voto);
+          gradosDataTable.setValue(i, j + 1, voto);
         });
       });
-
-      gradosChart.draw(gradosDataTable, getGradosOptions());
     }
+
+    gradosChart.draw(gradosDataTable, {
+      legend: { position: "top" },
+      bar: { groupWidth: "70%" },
+      animation: { duration: 350, easing: "out" },
+      chartArea: { width: "88%", height: "70%" },
+      hAxis: { title: "Grados" },
+      vAxis: { title: "Votos" }
+    });
 
   } catch (err) {
     document.getElementById("grados_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando participación por grado.</p>";
   }
 
-  setTimeout(drawGradosChart, 3000);
+  setTimeout(drawGradosChart, 3500);
 }
 
 
-function getGradosOptions() {
-  return {
-    legend: { position: "top" },
-    bar: { groupWidth: "70%" },
-    animation: { duration: 400, easing: "out" },
-    chartArea: { left: 60, width: "88%", height: "70%" },
-    hAxis: { title: "Grados" },
-    vAxis: { title: "Votos" },
-  };
+
+// ===================================================================
+// ⭐ FUNCIÓN: MOSTRAR GANADOR CON ANIMACIÓN
+// ===================================================================
+function mostrarGanador() {
+  if (!ganadorActual) {
+    alert("⚠️ El ganador aún no está disponible.");
+    return;
+  }
+
+  document.getElementById("winnerName").innerHTML =
+    `🏆 ${ganadorActual}`;
+
+  document.getElementById("winnerModal").style.display = "flex";
+}
+
+function cerrarGanador() {
+  document.getElementById("winnerModal").style.display = "none";
 }

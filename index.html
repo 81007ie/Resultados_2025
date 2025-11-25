@@ -36,6 +36,48 @@
             border-bottom: 4px solid var(--azul-borde);
             margin-bottom: 40px;
         }
+
+        /* Modal del ganador */
+        #winnerModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s forwards;
+        }
+        .winnerBox {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 450px;
+            text-align: center;
+            animation: popIn 0.6s ease-out forwards;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .winnerBox h2 {
+            font-size: 2rem;
+            color: var(--azul-oscuro);
+        }
+        .winnerBox button {
+            margin-top: 20px;
+            padding: 10px 25px;
+            font-size: 1rem;
+            background: var(--azul-borde);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
     </style>
 
     <script src="https://www.gstatic.com/charts/loader.js"></script>
@@ -44,12 +86,18 @@
 <body>
     <div class="dashboard-container">
         <h1>📊 Resultados de Votos</h1>
+
+        <!-- BOTÓN PARA MOSTRAR GANADOR -->
+        <button onclick="mostrarGanador()" 
+            style="background:#FFD700; padding:12px 25px; border:none; border-radius:10px;
+                   font-size:1.1em; cursor:pointer; display:block; margin:0 auto 25px auto;">
+            🎉
+        </button>
         
         <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">
             🥇 Conteo Total de Votos por Lista
         </h2>
 
-        <!-- ID CORRECTO -->
         <div id="resumen_chart_div" style="width: 100%; height: 520px; margin: 0 auto 50px auto;"></div>
 
         <hr style="border: 1px dashed #ccc; margin: 40px 0;">
@@ -58,11 +106,16 @@
             🔎 Participación por Grado
         </h2>
 
-        <!-- ID CORRECTO -->
-        <div id="grados_chart_div"
-             style="width: 100%; height: 550px; margin: 0 auto; padding: 10px;">
-        </div>
+        <div id="grados_chart_div" style="width: 100%; height: 550px; margin:0 auto;"></div>
+    </div>
 
+    <!-- MODAL GANADOR -->
+    <div id="winnerModal">
+        <div class="winnerBox">
+            <h2 id="winnerName">Ganador</h2>
+            <p style="font-size:1.3rem; margin-top:10px;">🎊 ¡Felicidades a la lista ganadora!</p>
+            <button onclick="cerrarGanador()">Cerrar</button>
+        </div>
     </div>
 
     <script src="resultados.js"></script>
