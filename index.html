@@ -6,119 +6,150 @@
     <title>Resultados Elecciones 🗳️</title>
     <link rel="icon" type="image/png" href="logo.png">
 
-    <link rel="stylesheet" href="colors.css">
+    <!-- Fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
         :root { 
-            --azul-oscuro: #1e3c72;
+            --azul-oscuro: #0A2342;
             --azul-borde: #00AEEF;
-        }
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, #e0f2f7 0%, #d8e5ed 100%); 
-            min-height: 100vh; 
-            padding: 40px; 
-            color: #555;
-        }
-        .dashboard-container {
-            max-width: 1300px; 
-            margin: 0 auto; 
-            background: white;
-            padding: 40px; 
-            border-radius: 25px;
-            box-shadow: 0 15px 60px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center; 
-            color: var(--azul-oscuro); 
-            font-size: 2.5em; 
-            padding-bottom: 15px;
-            border-bottom: 4px solid var(--azul-borde);
-            margin-bottom: 40px;
+            --fondo: #F0F6FA;
         }
 
-        /* MODAL */
+        /* ================================
+           BASE
+        ================================= */
+        body { 
+            font-family: 'Poppins', sans-serif;
+            background: var(--fondo);
+            margin: 0;
+            padding: 30px;
+            color: #444;
+        }
+
+        .dashboard-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 35px;
+            border-radius: 22px;
+            box-shadow: 0 12px 45px rgba(0,0,0,0.09);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--azul-oscuro);
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            border-bottom: 3px solid var(--azul-borde);
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            color: var(--azul-oscuro);
+            text-align: center;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* ================================
+           BOTÓN GANADOR
+        ================================= */
+        .btn-ganador {
+            background: #FFD700;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto 25px auto;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .btn-ganador:hover {
+            transform: scale(1.05);
+        }
+
+        /* ================================
+           MODAL GANADOR
+        ================================= */
         #winnerModal {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.75);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.65);
             backdrop-filter: blur(4px);
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.5s forwards;
         }
-
         .winnerBox {
             background: white;
-            padding: 40px;
-            border-radius: 20px;
-            width: 450px;
+            padding: 35px;
+            border-radius: 18px;
+            width: 420px;
             text-align: center;
-            animation: popIn 0.6s ease-out forwards;
+            animation: popIn 0.4s ease-out forwards;
         }
+
         @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
+            0% { transform: scale(0.7); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
+
         .winnerBox h2 {
-            font-size: 2rem;
             color: var(--azul-oscuro);
+            font-size: 1.9rem;
         }
+
         .winnerBox button {
             margin-top: 20px;
-            padding: 10px 25px;
-            font-size: 1rem;
+            padding: 10px 22px;
             background: var(--azul-borde);
             border: none;
+            border-radius: 10px;
             color: white;
-            border-radius: 8px;
             cursor: pointer;
+            font-size: 1rem;
         }
+
+        /* ================================
+           CANVAS — auto-ajuste
+        ================================= */
+        canvas {
+            max-height: 380px !important;   /* evita scroll y gráficos gigantes */
+            margin-bottom: 40px;
+        }
+
     </style>
 
-    <!-- ✅ Chart.js -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
     <div class="dashboard-container">
+
         <h1>📊 Resultados de Votos</h1>
 
-        <!-- BOTÓN PARA MOSTRAR GANADOR -->
-        <button onclick="mostrarGanador()" 
-            style="background:#FFD700; padding:12px 25px; border:none; border-radius:10px;
-                   font-size:1.1em; cursor:pointer; display:block; margin:0 auto 25px auto;">
-            🎉
-        </button>
-        
-        <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">
-            🥇 Conteo Total de Votos por Lista
-        </h2>
+        <button class="btn-ganador" onclick="mostrarGanador()">🎉 Ver Ganador</button>
 
-        <!-- 🔥 AHORA ES CANVAS PARA CHART.JS -->
-        <canvas id="resumenChart" style="width: 100%; height: 520px; margin: 0 auto 50px auto;"></canvas>
+        <h2>🥇 Conteo Total de Votos por Lista</h2>
+        <canvas id="resumenChart"></canvas>
 
         <hr style="border: 1px dashed #ccc; margin: 40px 0;">
 
-        <h2 style="color: var(--azul-oscuro); margin-top: 40px; text-align: center;">
-            🔎 Participación por Grado
-        </h2>
+        <h2>🔎 Participación por Grado</h2>
+        <canvas id="gradosChart"></canvas>
 
-        <!-- 🔥 CANVAS PARA EL SEGUNDO GRÁFICO -->
-        <canvas id="gradosChart" style="width: 100%; height: 550px;"></canvas>
     </div>
 
     <!-- MODAL GANADOR -->
     <div id="winnerModal">
         <div class="winnerBox">
             <h2 id="winnerName">Ganador</h2>
-            <p style="font-size:1.3rem; margin-top:10px;">🎊 ¡Felicidades a la lista ganadora!</p>
+            <p style="font-size:1.2rem;">🎊 ¡Felicidades a la lista ganadora!</p>
             <button onclick="cerrarGanador()">Cerrar</button>
         </div>
     </div>

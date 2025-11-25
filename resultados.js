@@ -1,14 +1,18 @@
-// ======================================================================
-//  CONFIG – LINKS CSV
-// ======================================================================
-const CSV_RESUMEN =
+const CSV_RESUMEN_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcaBIoYeJQDOMRnrmXWro6B4bGEEB1jjs5zKrwrly-hoCE1kSX_0AR_cqLTWCg2uXaDpYkCIsOfBps/pub?gid=1215585848&single=true&output=csv";
 
-const CSV_ANALISIS =
+const CSV_ANALISIS_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcaBIoYeJQDOMRnrmXWro6B4bGEEB1jjs5zKrwrly-hoCE1kSX_0AR_cqLTWCg2uXaDpYkCIsOfBps/pub?gid=1597888877&single=true&output=csv";
 
 console.log("📊 Chart.js cargado correctamente.");
 
+
+// ======================================================================
+//  FUNCIÓN PARA ELIMINAR CACHE DE GOOGLE SHEETS
+// ======================================================================
+function noCache(url) {
+  return `${url}&t=${Date.now()}`;
+}
 
 // ======================================================================
 //  CSV PARSER ROBUSTO
@@ -55,7 +59,10 @@ async function drawResumenChart() {
   console.log("==============================");
 
   try {
-    const res = await fetch(CSV_RESUMEN, { cache: "no-store" });
+    const url = noCache(CSV_RESUMEN_BASE);
+    console.log("🔗 Fetch URL:", url);
+
+    const res = await fetch(url);
     console.log("📥 Estado FETCH:", res.status);
 
     const csv = await res.text();
@@ -77,7 +84,6 @@ async function drawResumenChart() {
     console.log("📊 Valores:", values);
     console.log("🏆 Ganador:", ganadorActual);
 
-    // EXTRA: Si ya existe el gráfico → lo destruye (Chart.js lo requiere)
     if (resumenChartInstance) resumenChartInstance.destroy();
 
     const ctx = document.getElementById("resumenChart").getContext("2d");
@@ -89,21 +95,16 @@ async function drawResumenChart() {
         datasets: [{
           label: "Votos",
           data: values,
-          backgroundColor: labels.map((_, i) => coloresListas[i % coloresListas.length]),
-          borderColor: "#0b2e57",
-          borderWidth: 2
+          backgroundColor: coloresListas,
+          borderWidth: 1
         }]
       },
       options: {
         responsive: true,
-        animation: { duration: 400 },
-        scales: {
-          y: { beginAtZero: true }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
-        }
+        maintainAspectRatio: false, // ⬅ evita que crezca demasiado
+        animation: { duration: 300 },
+        scales: { y: { beginAtZero: true } },
+        plugins: { legend: { display: false } }
       }
     });
 
@@ -126,7 +127,10 @@ async function drawGradosChart() {
   console.log("==============================");
 
   try {
-    const res = await fetch(CSV_ANALISIS, { cache: "no-store" });
+    const url = noCache(CSV_ANALISIS_BASE);
+    console.log("🔗 Fetch URL:", url);
+
+    const res = await fetch(url);
     const csv = await res.text();
 
     console.log("📄 CSV ANALISIS primeras líneas:\n",
@@ -161,13 +165,10 @@ async function drawGradosChart() {
       },
       options: {
         responsive: true,
-        animation: { duration: 400 },
-        scales: {
-          y: { beginAtZero: true }
-        },
-        plugins: {
-          legend: { position: "top" }
-        }
+        maintainAspectRatio: false,
+        animation: { duration: 300 },
+        scales: { y: { beginAtZero: true } },
+        plugins: { legend: { position: "top" } }
       }
     });
 
@@ -186,7 +187,6 @@ async function drawGradosChart() {
 // ======================================================================
 function mostrarGanador() {
   if (!ganadorActual) return alert("⚠️ Aún no hay ganador.");
-
   document.getElementById("winnerName").innerHTML = `🏆 ${ganadorActual}`;
   document.getElementById("winnerModal").style.display = "flex";
 }
