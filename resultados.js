@@ -11,13 +11,10 @@ google.charts.setOnLoadCallback(() => {
 });
 
 
-// ========================================================
-// CSV Parser ROBUSTO (Soporta comillas y BOM)
-// ========================================================
+// ===============================
+// CSV Parser ROBUSTO
+// ===============================
 function parseCSV(text) {
-  // 🔥 Remove BOM si existe
-  text = text.replace(/^\uFEFF/, "");
-
   return text
     .trim()
     .split("\n")
@@ -35,10 +32,9 @@ function parseCSV(text) {
 }
 
 
-
-// ========================================================
+// ===============================
 // COLORES LISTAS
-// ========================================================
+// ===============================
 const coloresListas = [
   "#1e88e5", "#ffb300", "#43a047", "#e53935",
   "#8e24aa", "#00acc1"
@@ -49,22 +45,19 @@ let resumenChart;
 let ganadorActual = null;
 
 
-// ========================================================
-// 1️⃣ GRÁFICO RESUMEN (Corregido + Logs)
-// ========================================================
+// ===================================================================
+// 1️⃣ GRÁFICO RESUMEN — FIX COMPLETO
+// ===================================================================
 async function drawResumenChart() {
   console.log("🔄 Actualizando gráfico RESUMEN…");
 
   try {
-    const response = await fetch(CSV_RESUMEN);
+    const res = await fetch(CSV_RESUMEN);
+    console.log("📥 Fetch status CSV_RESUMEN:", res.status);
 
-    console.log("📥 Fetch status CSV_RESUMEN:", response.status);
+    const csv = await res.text();
+    console.log("📄 CSV recibido (primeras líneas):\n", csv.split("\n").slice(0,4).join("\n"));
 
-    const csv = await response.text();
-
-    console.log("📄 CSV recibido (primeras líneas):\n", csv.slice(0, 200));
-
-    // 🔍 Parsear CSV
     const parsed = parseCSV(csv);
     console.log("🔍 CSV parseado:", parsed);
 
@@ -74,28 +67,23 @@ async function drawResumenChart() {
 
     console.log("📌 Filas usadas:", rows);
 
-    // Convertir votos a enteros
-    const votos = rows.map(r => [
-      r[0],
-      Math.round(Number(r[1])) || 0
-    ]);
-
+    const votos = rows.map(r => [r[0], Math.round(Number(r[1]))]);
     console.log("📊 Votos procesados:", votos);
 
-    // Calcular ganador
     const maxVotos = Math.max(...votos.map(v => v[1]));
-    const ganador = votos.find(v => v[1] === maxVotos)?.[0] ?? "Sin datos";
+    const ganador = votos.find(v => v[1] === maxVotos)?.[0];
     ganadorActual = ganador;
+    console.log("🏆 Ganador detectado:", ganador);
 
-    console.log("🏆 Ganador detectado:", ganadorActual);
-
-    // Crear o actualizar tabla
+    // ===========================
+    // CREAR TABLA SI NO EXISTE
+    // ===========================
     if (!resumenDataTable) {
       resumenDataTable = new google.visualization.DataTable();
       resumenDataTable.addColumn("string", "Lista");
       resumenDataTable.addColumn("number", "Votos");
       resumenDataTable.addColumn({ type: "string", role: "style" });
-      resumenDataTable.addColumn({ type: "string", role: "annotation" });
+      resumenDataTable.addColumn({ type: "string", role: "annotation" }); // <-- STRING OBLIGATORIO
 
       votos.forEach((v, i) => {
         const color = coloresListas[i % coloresListas.length];
@@ -104,13 +92,22 @@ async function drawResumenChart() {
             ? `color:${color}; stroke-color:#FFD700; stroke-width:6;`
             : `color:${color}`;
 
-        resumenDataTable.addRow([v[0], v[1], style, v[1]]);
+        resumenDataTable.addRow([
+          v[0],
+          v[1],
+          style,
+          String(v[1]) // <-- FIX CRÍTICO
+        ]);
       });
 
       resumenChart = new google.visualization.ColumnChart(
         document.getElementById("resumen_chart_div")
       );
+
     } else {
+      // ===========================
+      // ACTUALIZAR TABLA EXISTENTE
+      // ===========================
       votos.forEach((v, i) => {
         const color = coloresListas[i % coloresListas.length];
         const style =
@@ -120,24 +117,21 @@ async function drawResumenChart() {
 
         resumenDataTable.setValue(i, 1, v[1]);
         resumenDataTable.setValue(i, 2, style);
-        resumenDataTable.setValue(i, 3, v[1]);
+        resumenDataTable.setValue(i, 3, String(v[1])); // <-- FIX CRÍTICO
       });
     }
 
     resumenChart.draw(resumenDataTable, {
       legend: "none",
-      animation: { duration: 400, easing: "out" },
-      bar: { groupWidth: "70%" },
-      chartArea: { width: "80%", height: "70%" },
+      animation: { duration: 350, easing: "out" },
+      bar: { groupWidth: "65%" },
+      chartArea: { width: "80%", height: "75%" },
       hAxis: { title: "Listas" },
       vAxis: { title: "Votos" }
     });
 
-    console.log("✅ Gráfico RESUMEN dibujado correctamente");
-
   } catch (err) {
     console.error("❌ ERROR GRAVE EN RESUMEN:", err);
-
     document.getElementById("resumen_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando datos del resumen.</p>";
   }
@@ -147,9 +141,11 @@ async function drawResumenChart() {
 
 
 
-// ========================================================
-// 2️⃣ GRÁFICO POR GRADOS (Con logs)
-// ========================================================
+
+
+// ===================================================================
+// 2️⃣ GRÁFICO POR GRADOS — (ya funcionaba OK)
+// ===================================================================
 let gradosDataTable;
 let gradosChart;
 
@@ -157,12 +153,11 @@ async function drawGradosChart() {
   console.log("🔄 Actualizando gráfico POR GRADOS…");
 
   try {
-    const response = await fetch(CSV_ANALISIS);
-    console.log("📥 Fetch status CSV_ANALISIS:", response.status);
+    const res = await fetch(CSV_ANALISIS);
+    console.log("📥 Fetch status CSV_ANALISIS:", res.status);
 
-    const csv = await response.text();
-
-    console.log("📄 CSV ANALISIS recibido:\n", csv.slice(0, 200));
+    const csv = await res.text();
+    console.log("📄 CSV ANALISIS recibido:\n", csv.split("\n").slice(0,4).join("\n"));
 
     const rows = parseCSV(csv);
     console.log("🔍 CSV ANALISIS parseado:", rows);
@@ -170,14 +165,15 @@ async function drawGradosChart() {
     const listas = rows[0].slice(1);
     const grados = rows.slice(1).map(r => r[0]);
 
-    const datos = rows.slice(1).map(r => r.slice(1).map(v => Math.round(Number(v))));
+    const datos = rows.slice(1).map(r =>
+      r.slice(1).map(v => Math.round(Number(v)))
+    );
 
     console.log("📊 Datos por grado:", datos);
 
     if (!gradosDataTable) {
       gradosDataTable = new google.visualization.DataTable();
       gradosDataTable.addColumn("string", "Grado");
-
       listas.forEach(lista => gradosDataTable.addColumn("number", lista));
 
       datos.forEach((fila, i) => {
@@ -197,7 +193,7 @@ async function drawGradosChart() {
     }
 
     gradosChart.draw(gradosDataTable, {
-      legend: "top",
+      legend: { position: "top" },
       bar: { groupWidth: "70%" },
       animation: { duration: 350, easing: "out" },
       chartArea: { width: "88%", height: "70%" },
@@ -208,8 +204,7 @@ async function drawGradosChart() {
     console.log("✅ Gráfico GRADOS dibujado correctamente");
 
   } catch (err) {
-    console.error("❌ ERROR GRAVE EN GRADOS:", err);
-
+    console.error("❌ ERROR en GRADOS:", err);
     document.getElementById("grados_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando participación por grado.</p>";
   }
@@ -218,10 +213,9 @@ async function drawGradosChart() {
 }
 
 
-
-// ========================================================
+// ===================================================================
 // ⭐ GANADOR
-// ========================================================
+// ===================================================================
 function mostrarGanador() {
   if (!ganadorActual) {
     alert("⚠️ El ganador aún no está disponible.");
