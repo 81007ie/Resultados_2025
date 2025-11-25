@@ -37,20 +37,18 @@
             margin-bottom: 40px;
         }
 
+        /* MODAL */
         #winnerModal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-
-    /* ✅ Soporte completo */
-    -webkit-backdrop-filter: blur(4px); /* Safari */
-    backdrop-filter: blur(4px); /* Chrome, Edge, Firefox */
-
-    justify-content: center;
-    align-items: center;
-    animation: fadeIn 0.5s forwards;
-}
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s forwards;
+        }
 
         .winnerBox {
             background: white;
@@ -84,7 +82,8 @@
         }
     </style>
 
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- ✅ Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -102,7 +101,8 @@
             🥇 Conteo Total de Votos por Lista
         </h2>
 
-        <div id="resumen_chart_div" style="width: 100%; height: 520px; margin: 0 auto 50px auto;"></div>
+        <!-- 🔥 AHORA ES CANVAS PARA CHART.JS -->
+        <canvas id="resumenChart" style="width: 100%; height: 520px; margin: 0 auto 50px auto;"></canvas>
 
         <hr style="border: 1px dashed #ccc; margin: 40px 0;">
 
@@ -110,7 +110,8 @@
             🔎 Participación por Grado
         </h2>
 
-        <div id="grados_chart_div" style="width: 100%; height: 550px; margin:0 auto;"></div>
+        <!-- 🔥 CANVAS PARA EL SEGUNDO GRÁFICO -->
+        <canvas id="gradosChart" style="width: 100%; height: 550px;"></canvas>
     </div>
 
     <!-- MODAL GANADOR -->
