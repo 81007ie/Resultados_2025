@@ -45,20 +45,40 @@ let ganadorActual = null;
 
 
 // ===================================================================
-// 1️⃣ GRÁFICO RESUMEN
+// 1️⃣ GRÁFICO RESUMEN (VERSIÓN CORREGIDA Y ROBUSTA)
 // ===================================================================
 async function drawResumenChart() {
   try {
     const csv = await (await fetch(CSV_RESUMEN)).text();
-    const rows = parseCSV(csv).filter(r => r[0] && r[1]).slice(1);
 
-    // 🔥 FORZAR ENTEROS
-    const votos = rows.map(r => [r[0], Math.round(Number(r[1]))]);
+    // ============================================================
+    // ✅ FILTRO ROBUSTO
+    // - NO elimina filas válidas
+    // - Asegura que cada fila tenga al menos 2 columnas
+    // - Ignora filas vacías o con basura
+    // ============================================================
+    const rows = parseCSV(csv)
+      .filter(r => r.length >= 2 && r[0].trim() !== "")
+      .slice(1); // quitar la cabecera
 
+    // ============================================================
+    // 🔥 Convertir a enteros sí o sí
+    // ============================================================
+    const votos = rows.map(r => [
+      r[0],                           // nombre de la lista
+      Math.round(Number(r[1])) || 0   // votos convertidos
+    ]);
+
+    // ============================================================
+    // 🏆 Calcular ganador
+    // ============================================================
     const maxVotos = Math.max(...votos.map(v => v[1]));
-    const ganador = votos.find(v => v[1] === maxVotos)?.[0];
+    const ganador = votos.find(v => v[1] === maxVotos)?.[0] ?? "Sin datos";
     ganadorActual = ganador;
 
+    // ============================================================
+    // 📊 Construcción o actualización de DataTable
+    // ============================================================
     if (!resumenDataTable) {
       resumenDataTable = new google.visualization.DataTable();
       resumenDataTable.addColumn("string", "Lista");
@@ -70,7 +90,7 @@ async function drawResumenChart() {
         const color = coloresListas[i % coloresListas.length];
         const style =
           v[1] === maxVotos
-            ? `color:${color}; stroke-color:#FFD700; stroke-width:6;`
+            ? `color:${color}; stroke-color:#FFD700; stroke-width:6;` // resaltar ganador
             : `color:${color}`;
 
         resumenDataTable.addRow([v[0], v[1], style, v[1]]);
@@ -82,19 +102,21 @@ async function drawResumenChart() {
 
     } else {
       votos.forEach((v, i) => {
-        resumenDataTable.setValue(i, 1, v[1]);
-        resumenDataTable.setValue(i, 3, v[1]);
-
         const color = coloresListas[i % coloresListas.length];
         const style =
           v[1] === maxVotos
             ? `color:${color}; stroke-color:#FFD700; stroke-width:6;`
             : `color:${color}`;
 
+        resumenDataTable.setValue(i, 1, v[1]);
         resumenDataTable.setValue(i, 2, style);
+        resumenDataTable.setValue(i, 3, v[1]);
       });
     }
 
+    // ============================================================
+    // 🎨 Dibujar gráfica
+    // ============================================================
     resumenChart.draw(resumenDataTable, {
       legend: "none",
       animation: { duration: 400, easing: "out" },
@@ -109,8 +131,10 @@ async function drawResumenChart() {
       "<p style='color:red;text-align:center'>⚠️ Error cargando datos del resumen.</p>";
   }
 
+  // 🔄 Actualizar cada 3.5 s
   setTimeout(drawResumenChart, 3500);
 }
+
 
 
 
