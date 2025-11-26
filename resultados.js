@@ -144,7 +144,7 @@ function cerrarGanador() {
 }
 
 /* ==============================================================
-   ⭐ CONFETTI — lluvia desde arriba, detrás del modal
+   ⭐ CONFETTI — lluvia en toda la pantalla, mismo nivel que modal
  ============================================================== */
 
 let confettiInterval = null;
@@ -154,19 +154,28 @@ function iniciarConfeti() {
   detenerConfeti();
 
   const canvas = document.getElementById("confettiCanvas");
-  confettiInstance = confetti.create(canvas, { resize: true });
 
+  // Instancia del confeti sobre el canvas fijo
+  confettiInstance = confetti.create(canvas, {
+    resize: true,
+    useWorker: true
+  });
+
+  // Lluvia continua y más visible
   confettiInterval = setInterval(() => {
     confettiInstance({
-      particleCount: 70,
-      spread: 120,
-      startVelocity: 25,
-      gravity: 0.9,
-      scalar: 1.4,
-      ticks: 250,
-      origin: { x: Math.random(), y: -0.1 }
+      particleCount: 90,    // Más cantidad
+      spread: 160,          // Se dispersa más, cubre toda la pantalla
+      startVelocity: 35,
+      gravity: 1.0,         // Llega hasta abajo siempre
+      scalar: 1.6,          // Confeti más grande
+      ticks: 280,
+      origin: {
+        x: Math.random(),   // Cae desde posiciones aleatorias horizontales
+        y: -0.2             // Empieza arriba del viewport
+      }
     });
-  }, 350);
+  }, 280);
 }
 
 function detenerConfeti() {
@@ -175,6 +184,7 @@ function detenerConfeti() {
     confettiInterval = null;
   }
 }
+
 
 drawResumenChart();
 drawGradosChart();
