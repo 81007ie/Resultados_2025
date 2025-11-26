@@ -99,11 +99,29 @@
         100% { transform: scale(1); opacity: 1; }
     }
 
+    /* ⭐ Nuevo estilo de botón Cerrar */
+    .winnerBox button {
+        margin-top: 20px;
+        padding: 12px 25px;
+        background: var(--azul-borde);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        font-size: 1.05rem;
+        transition: 0.25s ease;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .winnerBox button:hover {
+        background: #0089c7;
+        transform: scale(1.05);
+    }
+
     /* ================================ */
-    /* AREA SCROLL DE GRÁFICOS */
+    /* ÁREA DE GRÁFICOS MÁS GRANDE */
     /* ================================ */
     .chart-wrapper {
-        max-height: 400px;
+        max-height: 450px;
         overflow-y: auto;
         padding-right: 15px;
         margin-bottom: 40px;
@@ -111,7 +129,7 @@
 
     canvas {
         width: 100% !important;
-        height: 380px !important;
+        height: 450px !important; /* ↑ Antes 380px */
     }
 
     /* ================================ */
@@ -123,8 +141,9 @@
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 1; /* Debajo del modal y del contenido */
+        z-index: 1;
     }
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -132,8 +151,7 @@
 
 <body>
 
-<!-- Canvas especial para confeti -->
-<canvas id="confetti-canvas"></canvas>
+
 
 <div class="dashboard-container">
     <h1>📊 Resultados de Votos</h1>
@@ -152,6 +170,9 @@
         <canvas id="gradosChart"></canvas>
     </div>
 </div>
+
+<!-- Canvas especial para confeti -->
+<canvas id="confetti-canvas"></canvas>
 
 <!-- MODAL GANADOR -->
 <div id="winnerModal">
