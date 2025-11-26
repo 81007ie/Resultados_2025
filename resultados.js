@@ -6,16 +6,16 @@ const CSV_ANALISIS_BASE =
 
 console.log("📊 Chart.js cargado correctamente.");
 
-// ==============================
-// FUNCIÓN PARA ELIMINAR CACHE
-// ==============================
+// ======================================================================
+// FUNCIÓN PARA ELIMINAR CACHE DE GOOGLE SHEETS
+// ======================================================================
 function noCache(url) {
   return `${url}&t=${Date.now()}`;
 }
 
-// ==============================
+// ======================================================================
 // CSV PARSER ROBUSTO
-// ==============================
+// ======================================================================
 function parseCSV(text) {
   console.log("📥 Parseando CSV…");
   return text
@@ -34,9 +34,9 @@ function parseCSV(text) {
     });
 }
 
-// ==============================
+// ======================================================================
 // COLORES LISTAS
-// ==============================
+// ======================================================================
 const coloresListas = [
   "#1e88e5", "#ffb300", "#43a047", "#e53935",
   "#8e24aa", "#00acc1"
@@ -46,16 +46,21 @@ let resumenChartInstance = null;
 let gradosChartInstance = null;
 let ganadorActual = null;
 
-// ✨ Confeti
-let confettiInterval = null;
-
-// ==============================
-// GRÁFICO RESUMEN
-// ==============================
+// ======================================================================
+// 1️⃣ GRÁFICO RESUMEN — TOTAL DE VOTOS POR LISTA
+// ======================================================================
 async function drawResumenChart() {
+  console.log("\n==============================");
+  console.log("🔄 Actualizando gráfico RESUMEN…");
+  console.log("==============================");
+
   try {
     const url = noCache(CSV_RESUMEN_BASE);
+    console.log("🔗 Fetch URL:", url);
+
     const res = await fetch(url);
+    console.log("📥 Estado FETCH:", res.status);
+
     const csv = await res.text();
     const parsed = parseCSV(csv);
 
@@ -90,28 +95,37 @@ async function drawResumenChart() {
         plugins: { legend: { display: false } }
       }
     });
+
   } catch (err) {
     console.error("❌ ERROR RESUMEN:", err);
-    document.getElementById("resumenChart").innerHTML =
+    document.getElementById("resumen_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando datos del resumen.</p>";
   }
 
+  // 🔁 Actualización cada 30 segundos
   setTimeout(drawResumenChart, 30000);
 }
 
-// ==============================
-// GRÁFICO GRADOS
-// ==============================
+// ======================================================================
+// 2️⃣ GRÁFICO POR GRADOS — PARTICIPACIÓN
+// ======================================================================
 async function drawGradosChart() {
+  console.log("\n==============================");
+  console.log("🔄 Actualizando gráfico GRADOS…");
+  console.log("==============================");
+
   try {
     const url = noCache(CSV_ANALISIS_BASE);
     const res = await fetch(url);
     const csv = await res.text();
+
     const rows = parseCSV(csv);
 
     const listas = rows[0].slice(1);
     const grados = rows.slice(1).map(r => r[0]);
-    const valores = rows.slice(1).map(r => r.slice(1).map(v => Number(v)));
+    const valores = rows.slice(1).map(r =>
+      r.slice(1).map(v => Number(v))
+    );
 
     if (gradosChartInstance) gradosChartInstance.destroy();
 
@@ -135,68 +149,32 @@ async function drawGradosChart() {
         plugins: { legend: { position: "top" } }
       }
     });
+
   } catch (err) {
     console.error("❌ ERROR GRADOS:", err);
-    document.getElementById("gradosChart").innerHTML =
+    document.getElementById("grados_chart_div").innerHTML =
       "<p style='color:red;text-align:center'>⚠️ Error cargando participación por grado.</p>";
   }
 
+  // 🔁 Actualización cada 30 segundos
   setTimeout(drawGradosChart, 30000);
 }
 
-// ==============================
-// MOSTRAR GANADOR CON CONFETI LLUVIA
-// ==============================
+// ======================================================================
+// ⭐ MOSTRAR GANADOR
+// ======================================================================
 function mostrarGanador() {
   if (!ganadorActual) return alert("⚠️ Aún no hay ganador.");
-
   document.getElementById("winnerName").innerHTML = `🏆 ${ganadorActual}`;
   document.getElementById("winnerModal").style.display = "flex";
-
-  // 🔥 Confeti vertical hasta abajo
-  if (confettiInterval) clearInterval(confettiInterval);
-
-  confettiInterval = setInterval(() => {
-    confetti({
-      particleCount: 8 + Math.floor(Math.random() * 12),
-      angle: 90,             // vertical
-      spread: 40,
-      origin: { x: Math.random(), y: 0 },
-      colors: coloresListas,
-      ticks: 200,            // duración larga para que llegue al fondo
-      gravity: 0.5,
-      scalar: 0.7 + Math.random() * 0.5,
-      drift: (Math.random() - 0.5) * 0.5
-    });
-    // partículas pequeñas adicionales
-    confetti({
-      particleCount: 12 + Math.floor(Math.random() * 15),
-      angle: 90,
-      spread: 60,
-      origin: { x: Math.random(), y: 0 },
-      colors: coloresListas,
-      ticks: 180,
-      gravity: 0.6,
-      scalar: 0.4 + Math.random() * 0.4,
-      drift: (Math.random() - 0.5)
-    });
-  }, 200);
 }
 
-// ==============================
-// CERRAR GANADOR
-// ==============================
 function cerrarGanador() {
   document.getElementById("winnerModal").style.display = "none";
-
-  if (confettiInterval) {
-    clearInterval(confettiInterval);
-    confettiInterval = null;
-  }
 }
 
-// ==============================
-// INICIO
-// ==============================
+// ======================================================================
+// 🚀 INICIO
+// ======================================================================
 drawResumenChart();
 drawGradosChart();
