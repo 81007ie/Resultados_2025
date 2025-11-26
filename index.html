@@ -16,6 +16,9 @@
         --fondo: #F0F6FA;
     }
 
+    /* ================================
+       BASE
+    ================================= */
     body { 
         font-family: 'Poppins', sans-serif;
         background: var(--fondo);
@@ -24,9 +27,6 @@
         color: #444;
     }
 
-    /* ================================ */
-    /* CONTENEDOR */
-    /* ================================ */
     .dashboard-container {
         max-width: 1100px;
         margin: 0 auto;
@@ -34,8 +34,6 @@
         padding: 35px;
         border-radius: 22px;
         box-shadow: 0 12px 45px rgba(0,0,0,0.09);
-        position: relative;
-        z-index: 5;
     }
 
     h1 {
@@ -55,9 +53,9 @@
         font-weight: 600;
     }
 
-    /* ================================ */
-    /* BOTÓN GANADOR */
-    /* ================================ */
+    /* ================================
+       BOTÓN GANADOR
+    ================================= */
     .btn-ganador {
         background: #FFD700;
         padding: 12px 25px;
@@ -72,9 +70,9 @@
     }
     .btn-ganador:hover { transform: scale(1.05); }
 
-    /* ================================ */
-    /* MODAL GANADOR */
-    /* ================================ */
+    /* ================================
+       MODAL GANADOR
+    ================================= */
     #winnerModal {
         display: none;
         position: fixed;
@@ -83,8 +81,9 @@
         backdrop-filter: blur(4px);
         justify-content: center;
         align-items: center;
-        z-index: 20;
+        z-index: 9000; /* modal muy encima */
     }
+
     .winnerBox {
         background: white;
         padding: 35px;
@@ -99,29 +98,23 @@
         100% { transform: scale(1); opacity: 1; }
     }
 
-    /* ⭐ Nuevo estilo de botón Cerrar */
+    .winnerBox h2 { color: var(--azul-oscuro); font-size: 1.9rem; }
     .winnerBox button {
         margin-top: 20px;
-        padding: 12px 25px;
+        padding: 10px 22px;
         background: var(--azul-borde);
         border: none;
         border-radius: 10px;
         color: white;
         cursor: pointer;
-        font-size: 1.05rem;
-        transition: 0.25s ease;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-    }
-    .winnerBox button:hover {
-        background: #0089c7;
-        transform: scale(1.05);
+        font-size: 1rem;
     }
 
-    /* ================================ */
-    /* ÁREA DE GRÁFICOS MÁS GRANDE */
-    /* ================================ */
+    /* ================================
+       CANVAS — scrollable charts
+    ================================= */
     .chart-wrapper {
-        max-height: 450px;
+        max-height: 400px;
         overflow-y: auto;
         padding-right: 15px;
         margin-bottom: 40px;
@@ -129,29 +122,31 @@
 
     canvas {
         width: 100% !important;
-        height: 450px !important; /* ↑ Antes 380px */
+        height: 380px !important;
     }
 
-    /* ================================ */
-    /* CANVAS DE CONFETI (fondo) */
-    /* ================================ */
-    #confetti-canvas {
+    /* ================================
+       CONFETI — detrás del modal pero encima de los gráficos
+    ================================= */
+    #confettiCanvas {
         position: fixed;
         inset: 0;
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 1;
+        z-index: 8000; /* debajo del modal, encima de gráficos */
     }
-
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 </head>
 
 <body>
 
-
+<!-- ⭐ Canvas Confeti (encima de gráficos, debajo del modal) -->
+<canvas id="confettiCanvas"></canvas>
 
 <div class="dashboard-container">
     <h1>📊 Resultados de Votos</h1>
@@ -171,9 +166,6 @@
     </div>
 </div>
 
-<!-- Canvas especial para confeti -->
-<canvas id="confetti-canvas"></canvas>
-
 <!-- MODAL GANADOR -->
 <div id="winnerModal">
     <div class="winnerBox">
@@ -183,8 +175,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="resultados.js"></script>
-
 </body>
 </html>
