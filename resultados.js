@@ -160,17 +160,54 @@ async function drawGradosChart() {
   setTimeout(drawGradosChart, 30000);
 }
 
-// ======================================================================
-// ⭐ MOSTRAR GANADOR
-// ======================================================================
-function mostrarGanador() {
-  if (!ganadorActual) return alert("⚠️ Aún no hay ganador.");
-  document.getElementById("winnerName").innerHTML = `🏆 ${ganadorActual}`;
-  document.getElementById("winnerModal").style.display = "flex";
+// ===============================
+// 🎉 CONFETI CONTROL
+// ===============================
+let confetiInterval = null;
+
+// Lluvia de confeti continua
+function iniciarConfeti() {
+  detenerConfeti(); // Reiniciar si ya había un intervalo activo
+
+  confetiInterval = setInterval(() => {
+    confetti({
+      particleCount: 60,     // Más partículas
+      spread: 80,            // Más dispersión
+      startVelocity: 30,     // Velocidad inicial más suave
+      gravity: 0.9,          // Caen hasta abajo
+      scalar: 1.4,           // Confeti más grande
+      ticks: 300,            // Dura más en pantalla
+      origin: { y: 0 }       // Caen desde arriba (lluvia)
+    });
+  }, 500); // cada 0.5s cae más confeti
 }
 
+// Detener confeti cuando se cierre el modal
+function detenerConfeti() {
+  if (confetiInterval) {
+    clearInterval(confetiInterval);
+    confetiInterval = null;
+  }
+}
+
+// ===============================
+// ⭐ MOSTRAR GANADOR
+// ===============================
+function mostrarGanador() {
+  if (!ganadorActual) return alert("⚠️ Aún no hay ganador.");
+
+  document.getElementById("winnerName").innerHTML = `🏆 ${ganadorActual}`;
+  document.getElementById("winnerModal").style.display = "flex";
+
+  iniciarConfeti(); // 🎉 Activar confeti continuo
+}
+
+// ===============================
+// ❌ CERRAR GANADOR
+// ===============================
 function cerrarGanador() {
   document.getElementById("winnerModal").style.display = "none";
+  detenerConfeti(); // Detener confeti al cerrar
 }
 
 // ======================================================================
