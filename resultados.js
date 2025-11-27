@@ -144,7 +144,7 @@ function cerrarGanador() {
 }
 
 /* ==============================================================
-   ⭐ CONFETTI — lluvia en toda la pantalla, mismo nivel que modal
+   ⭐ CONFETTI — explosión inicial + lluvia continua
  ============================================================== */
 
 let confettiInterval = null;
@@ -155,24 +155,33 @@ function iniciarConfeti() {
 
   const canvas = document.getElementById("confettiCanvas");
 
-  // Instancia del confeti sobre el canvas fijo
   confettiInstance = confetti.create(canvas, {
     resize: true,
     useWorker: true
   });
 
-  // Lluvia continua y más visible
+  /* 🎇 1) EXPLOSIÓN INICIAL — al abrir el modal */
+  confettiInstance({
+    particleCount: 250,
+    startVelocity: 55,
+    spread: 95,
+    ticks: 240,
+    scalar: 2.0,       // partículas grandes
+    origin: { x: 0.5, y: 0.55 } // centrado detrás del modal
+  });
+
+  /* 🎉 2) Lluvia continua */
   confettiInterval = setInterval(() => {
     confettiInstance({
-      particleCount: 90,    // Más cantidad
-      spread: 160,          // Se dispersa más, cubre toda la pantalla
+      particleCount: 90,
+      spread: 160,
       startVelocity: 35,
-      gravity: 1.0,         // Llega hasta abajo siempre
-      scalar: 1.6,          // Confeti más grande
+      gravity: 1.0,
+      scalar: 1.6,
       ticks: 280,
       origin: {
-        x: Math.random(),   // Cae desde posiciones aleatorias horizontales
-        y: -0.2             // Empieza arriba del viewport
+        x: Math.random(),
+        y: -0.2
       }
     });
   }, 280);
@@ -184,6 +193,7 @@ function detenerConfeti() {
     confettiInterval = null;
   }
 }
+
 
 
 drawResumenChart();
