@@ -134,7 +134,7 @@
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 8000; /* debajo del modal, encima de gráficos */
+        z-index: 0; /* debajo del modal, encima de gráficos */
     }
 </style>
 
@@ -145,8 +145,7 @@
 
 <body>
 
-<!-- ⭐ Canvas Confeti (encima de gráficos, debajo del modal) -->
-<canvas id="confettiCanvas"></canvas>
+
 
 <div class="dashboard-container">
     <h1>📊 Resultados de Votos</h1>
@@ -168,6 +167,10 @@
 
 <!-- MODAL GANADOR -->
 <div id="winnerModal">
+
+    <!-- ⭐ Canvas Confeti (encima de gráficos, debajo del modal) -->
+<canvas id="confettiCanvas"></canvas>
+
     <div class="winnerBox">
         <h2 id="winnerName">Ganador</h2>
         <p style="font-size:1.2rem;">🎊 ¡Felicidades a la lista ganadora!</p>
